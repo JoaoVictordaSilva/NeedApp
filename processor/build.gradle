@@ -1,28 +1,6 @@
 apply plugin: 'java'
 
 ext{
-    bintrayRepo = 'NeedApp'
-    bintrayName = 'NeedApp'
-
-    publishedGroupId = 'org.JoaoVictordaSilva'
-    libraryName = 'NeedApp'
-    artifact = 'NeedApp'
-
-    libraryDescription = 'Annotation processing to verify if other apps are installed'
-
-    siteUrl = 'https://github.com/JoaoVictordaSilva/NeedApp'
-    gitUrl = 'https://github.com/JoaoVictordaSilva/NeedApp.git'
-
-    libraryVersion = '1.0.0'
-
-    developerId = 'JoaoVictordaSilva'
-    developerName = 'João Victor da Silva'
-    developerEmail = 'joao150598@gmail.com'
-
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
-
     autoServiceVersion = '1.0-rc2'
     javaPoetVersion = '1.9.0'
 }
@@ -35,6 +13,3 @@ dependencies {
 
 sourceCompatibility = "1.7"
 targetCompatibility = "1.7"
-
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
