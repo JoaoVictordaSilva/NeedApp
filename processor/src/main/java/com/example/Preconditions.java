@@ -8,6 +8,7 @@ import java.util.List;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
 
 /**
  * Created by joao.victor on 15/12/2017.
@@ -20,8 +21,8 @@ class Preconditions {
         checkNeedAppValues(targetClass);
     }
 
-    static <T> void checkTargetClass(T targetClass, T children){
-        if(targetClass == null && children != null)
+    static <T> void checkTargetClass(T targetClass, T children) {
+        if (targetClass == null && children != null)
             throw new IllegalStateException("@NeedApp must have @TargetClass annotated in current class");
     }
 
@@ -76,10 +77,15 @@ class Preconditions {
         if (method.getParameters().size() > 1 || method.getParameters().size() == 0)
             throw new IllegalArgumentException(String.format("Method %s() in class %s must have only one parameter",
                     method.getSimpleName(), targetClass.getSimpleName()));
-//        else if (!parameters.get(0).asType().getKind().equals(TypeKind.ARRAY))
-//            throw new IllegalArgumentException(String.format("Method %s() in class %s must have a list of string as parameter",
-//                    method.getSimpleName(), targetClass.getSimpleName()));
+        else if (!parameters.get(0).asType().getKind().equals(TypeKind.ARRAY))
+            throw new IllegalArgumentException(String.format("Method %s() in class %s must have an array of string as parameter",
+                    method.getSimpleName(), targetClass.getSimpleName()));
     }
+
+    public static boolean hasAlias(ExecutableElement method) {
+        return method.getAnnotation(NeedApp.class).alias().length != 0;
+    }
+
 
     private <T> void checkNonNull(T value) {
         if (value == null)

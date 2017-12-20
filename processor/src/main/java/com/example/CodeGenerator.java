@@ -7,7 +7,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.lang.model.element.Element;
@@ -34,22 +33,21 @@ public class CodeGenerator {
     }
 
     public static MethodSpec generateAppVerification() {
-
         return MethodSpec.methodBuilder("isAppInstalled")
                 .addModifiers(Modifier.PRIVATE, Modifier.FINAL, Modifier.STATIC)
                 .addParameter(Context, "context")
-                .addParameter(String[].class, "needApp")
-                .addStatement("$T apps = new $T<>()", ClassNameHelper.ListString, ArrayList.class)
-                .beginControlFlow("for(int index = 0; index < needApp.length; index++)")
+                .addParameter(String[].class, "needApps")
+                .addStatement("String[] apps = new String[$N]", "needApps.length")
+                .beginControlFlow("for(int index = 0; index < needApps.length; index++)")
                 .addCode("try{")
-                .addStatement("context.getPackageManager().getPackageInfo(needApp[index], 0)")
+                .addStatement("context.getPackageManager().getPackageInfo(needApps[index], 0)")
                 .addCode("}  catch ($T e){", AndroidException)
-                .addStatement("apps.add(needApp[index])")
+                .addStatement("apps[index] = needApps[index]")
                 .addCode("}")
                 .endControlFlow()
                 .addStatement("return apps")
                 .addException(AndroidException)
-                .returns(ClassNameHelper.ListString)
+                .returns(String[].class)
                 .build();
 
     }
@@ -58,7 +56,7 @@ public class CodeGenerator {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(method.getSimpleName() + "NeedApp");
         builder.addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC);
         builder.addParameter(Context, "context");
-        transformArray(builder, apps);
+        transformArray("values", builder, apps);
         addBodyMethod(method, builder, targetClass);
         builder.addException(AndroidException);
         builder.returns(TypeName.VOID);
@@ -66,11 +64,18 @@ public class CodeGenerator {
         return builder.build();
     }
 
-    private static void transformArray(MethodSpec.Builder builder, String[] apps) {
-        builder.addStatement("String[] values = new String[$L]", apps.length);
+    private static void transformArray(String nameMethod, MethodSpec.Builder builder, String[] apps) {
+        builder.addStatement("String[] $L = new String[$L]", nameMethod, apps.length);
         for (int index = 0; index < apps.length; index++)
-            builder.addStatement("values[$L] = $S", index, apps[index]);
+            builder.addStatement("$L[$L] = $S", nameMethod, index, apps[index]);
     }
+
+    private static void outputAnnotationWithAlias(CodeBlock.Builder builder, String[] apps) {
+        builder.addStatement("$N = new String[$L]", "listApps", apps.length);
+        for (int index = 0; index < apps.length; index++)
+            builder.addStatement("$L[$L] = $S", "listApps", index, apps[index]);
+    }
+
 
     private static void addMethodsToClass(List<ExecutableElement> list, TypeSpec.Builder builder, Element targetClass) {
         String[] apps;
@@ -83,22 +88,31 @@ public class CodeGenerator {
     private static void addBodyMethod(ExecutableElement method, MethodSpec.Builder builder, Element targetClass) {
         List<? extends VariableElement> parameters = method.getParameters();
         builder.addCode(CodeBlock.builder()
-                .addStatement("$T listApps = $N(context, values) ", ClassNameHelper.ListString, "isAppInstalled")
+                .addStatement("$T listApps = $N(context, values) ", String[].class, "isAppInstalled")
                 .add("if($N == null) ", "listApps")
                 .add("(($L)context).$L(", targetClass, method.getSimpleName())
                 .add(addParameterToMethodAnnotated(parameters, builder))
                 .addStatement(")")
-                .add(outputAnnotation(targetClass))
+                .add(outputAnnotation(targetClass, method))
                 .build());
     }
 
 
-    private static CodeBlock outputAnnotation(Element targetClass) {
+    private static CodeBlock outputAnnotation(Element targetClass, ExecutableElement method) {
         CodeBlock.Builder builder = CodeBlock.builder();
         if (Preconditions.hasOutputAnnotation(targetClass)) {
-            Element outputAnnotation = getOutputAnnotation(targetClass);
             builder.add("else");
-            builder.addStatement("(($L)context).$L($N)", targetClass, outputAnnotation.getSimpleName(), "listApps");
+            Element outputAnnotation = getOutputAnnotation(targetClass);
+            if (Preconditions.hasAlias(method)) {
+                String[] alias = getAlias(method);
+                builder.add("{");
+                outputAnnotationWithAlias(builder, alias);
+                builder.addStatement("(($L)context).$L($N)", targetClass, outputAnnotation.getSimpleName(), "listApps");
+                builder.add("}");
+            } else
+                builder.addStatement("(($L)context).$L($N)", targetClass, outputAnnotation.getSimpleName(), "listApps");
+
+
         }
 
         return builder.build();
@@ -127,6 +141,10 @@ public class CodeGenerator {
             }
         }
         return null;
+    }
+
+    private static String[] getAlias(ExecutableElement method) {
+        return method.getAnnotation(NeedApp.class).alias();
     }
 
 

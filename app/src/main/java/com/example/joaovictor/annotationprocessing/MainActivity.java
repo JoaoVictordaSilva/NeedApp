@@ -2,6 +2,7 @@ package com.example.joaovictor.annotationprocessing;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.AndroidException;
 import android.util.Log;
 
 
@@ -19,6 +20,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        try {
+            MainActivity_Delegate.testNeedApp(this, "testando");
+        } catch (AndroidException e) {
+            e.printStackTrace();
+        }
     }
 
     @NeedApp(apps = NeedApp.LINKEDIN)
@@ -27,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @OnAppUninstalled
-    public void outputAnnotation(List<String> string) {
-        Log.e(this.getClass().getSimpleName(), " App unninstalled " + string.get(0));
+    public void outputAnnotation(String[] string) {
+        Log.e(this.getClass().getSimpleName(), " App unninstalled " + string[0]);
     }
 
 }

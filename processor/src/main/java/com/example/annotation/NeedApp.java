@@ -15,6 +15,8 @@ public @interface NeedApp {
 
     String[] apps();
 
+    String[] alias() default {};
+
     String YOUTUBE = "com.google.android.youtube";
 
     String FACEBOOK = "com.facebook.katana";
