@@ -1,6 +1,6 @@
 # NeedApp
 
-A simple library using annotation processing to verify that other applications are installed on the system.
+A simple library using annotation processing to verify if other applications are installed on the system.
 
 @TargetClass -> To delegate class what should do.
 
