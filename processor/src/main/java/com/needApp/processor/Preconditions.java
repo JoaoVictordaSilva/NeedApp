@@ -58,7 +58,7 @@ class Preconditions {
         ExecutableElement executableElement = (ExecutableElement) element;
         Set<Modifier> modifiers = executableElement.getModifiers();
         for (Modifier modifier : modifiers) {
-            if (modifier.equals(Modifier.PRIVATE))
+            if (!modifier.equals(Modifier.PUBLIC))
                 throw new IllegalStateException(String.format("Method %s() in %s must be public",
                         executableElement.getSimpleName(), targetClass.getSimpleName()));
 
