@@ -1,4 +1,4 @@
-package com.example;
+package com.needApp.processor;
 
 import com.squareup.javapoet.ClassName;
 
@@ -9,7 +9,7 @@ import com.squareup.javapoet.ClassName;
 class ClassNameHelper {
 
     private static final String contextPackage = "android.content";
-    public static final String needAppPackage = "com.needApp";
+    static final String needAppPackage = "com.needApp";
     private static final String androidUtilPackage = "android.util";
 
     static final ClassName Context = ClassName.get(contextPackage, "Context");

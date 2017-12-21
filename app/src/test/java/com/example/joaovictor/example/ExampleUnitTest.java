@@ -1,6 +1,5 @@
-package com.example.joaovictor.annotationprocessing;
+package com.example.joaovictor.example;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

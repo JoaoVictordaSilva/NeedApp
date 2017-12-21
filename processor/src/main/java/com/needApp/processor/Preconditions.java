@@ -1,4 +1,4 @@
-package com.example;
+package com.needApp.processor;
 
 import com.needApp.annotation.NeedApp;
 import com.needApp.annotation.OnAppUninstalled;

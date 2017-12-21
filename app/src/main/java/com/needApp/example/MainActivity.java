@@ -1,10 +1,9 @@
-package com.example.joaovictor.annotationprocessing;
+package com.needApp.example;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.needApp.MainActivity_Delegate;
 import com.needApp.annotation.NeedApp;
 import com.needApp.annotation.OnAppUninstalled;
 import com.needApp.annotation.TargetClass;
@@ -16,7 +15,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MainActivity_Delegate.testNeedApp(this, "Testando AP");
     }
 
     @NeedApp(apps = NeedApp.LINKEDIN)

@@ -1,4 +1,4 @@
-package com.example;
+package com.needApp.processor;
 
 import com.google.auto.service.AutoService;
 import com.needApp.annotation.NeedApp;

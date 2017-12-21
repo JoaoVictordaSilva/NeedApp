@@ -1,4 +1,4 @@
-package com.example.joaovictor.annotationprocessing;
+package com.example.joaovictor.example;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

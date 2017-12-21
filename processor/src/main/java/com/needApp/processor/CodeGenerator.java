@@ -1,4 +1,4 @@
-package com.example;
+package com.needApp.processor;
 
 import com.needApp.annotation.NeedApp;
 import com.needApp.annotation.OnAppUninstalled;
@@ -14,9 +14,9 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.VariableElement;
 
-import static com.example.ClassNameHelper.AndroidException;
-import static com.example.ClassNameHelper.Context;
-import static com.example.ClassNameHelper.Util;
+import static com.needApp.processor.ClassNameHelper.AndroidException;
+import static com.needApp.processor.ClassNameHelper.Context;
+import static com.needApp.processor.ClassNameHelper.Util;
 
 /**
  * Created by joao.victor on 12/12/2017.
