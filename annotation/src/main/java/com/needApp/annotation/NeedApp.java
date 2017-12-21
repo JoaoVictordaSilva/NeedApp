@@ -1,4 +1,4 @@
-package com.example.annotation;
+package com.needApp.annotation;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -12,10 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface NeedApp {
-
     String[] apps();
-
-    String[] alias() default {};
 
     String YOUTUBE = "com.google.android.youtube";
 
@@ -32,3 +29,4 @@ public @interface NeedApp {
     String LINKEDIN = "com.linkedin.android";
 
 }
+

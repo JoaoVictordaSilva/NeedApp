@@ -1,13 +1,14 @@
 package com.example;
 
-import com.example.annotation.NeedApp;
-import com.example.annotation.OnAppUninstalled;
+import com.needApp.annotation.NeedApp;
+import com.needApp.annotation.OnAppUninstalled;
 
 import java.util.List;
+import java.util.Set;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeKind;
 
 /**
@@ -36,7 +37,8 @@ class Preconditions {
             }
         }
         if (!hasAnnotation)
-            throw new IllegalStateException(String.format("Class %s must have at least one method annotated with @NeedApp ", targetClass.getSimpleName()));
+            throw new IllegalStateException(String.format("Class %s must have at least one method annotated with @NeedApp ",
+                    targetClass.getSimpleName()));
     }
 
     private static void checkNeedAppValues(Element targetClass) {
@@ -46,17 +48,29 @@ class Preconditions {
             NeedApp annotation = method.getAnnotation(NeedApp.class);
             if (annotation != null) {
                 apps = annotation.apps();
+                checkModifier(targetClass, method);
                 checkValues(apps, targetClass, method);
             }
         }
     }
 
+    private static void checkModifier(Element targetClass, Element element) {
+        ExecutableElement executableElement = (ExecutableElement) element;
+        Set<Modifier> modifiers = executableElement.getModifiers();
+        for (Modifier modifier : modifiers) {
+            if (modifier.equals(Modifier.PRIVATE))
+                throw new IllegalStateException(String.format("Method %s() in %s must be public",
+                        executableElement.getSimpleName(), targetClass.getSimpleName()));
+
+        }
+    }
+
     private static void checkValues(String[] apps, Element element, Element method) {
-        for (String app : apps) {
+        for (String app : apps)
             if (app.equals(""))
                 throw new IllegalStateException(String.format("Method %s() in class %s must have a valid annotation value ",
-                        element.getSimpleName(), method.getSimpleName()));
-        }
+                        method.getSimpleName(), element.getSimpleName()));
+
     }
 
     static boolean hasOutputAnnotation(Element targetClass) {
@@ -71,21 +85,21 @@ class Preconditions {
     }
 
     private static void checkOutputAnnotationParameters(Element targetClass) {
-        Element outputAnnotation = CodeGenerator.getOutputAnnotation(targetClass);
+        Element outputAnnotation = CodeGenerator.getOutputAnnotationValue(targetClass);
         ExecutableElement method = (ExecutableElement) outputAnnotation;
-        List<? extends VariableElement> parameters = method.getParameters();
-        if (method.getParameters().size() > 1 || method.getParameters().size() == 0)
-            throw new IllegalArgumentException(String.format("Method %s() in class %s must have only one parameter",
+        if (method.getParameters().size() != 0)
+            throw new IllegalArgumentException(String.format("Method %s() in class %s can't have any parameter ",
                     method.getSimpleName(), targetClass.getSimpleName()));
-        else if (!parameters.get(0).asType().getKind().equals(TypeKind.ARRAY))
-            throw new IllegalArgumentException(String.format("Method %s() in class %s must have an array of string as parameter",
+        else if (!method.getReturnType().getKind().equals(TypeKind.VOID))
+            throw new IllegalArgumentException(String.format("Method %s() in class %s must be void",
                     method.getSimpleName(), targetClass.getSimpleName()));
     }
 
-    public static boolean hasAlias(ExecutableElement method) {
-        return method.getAnnotation(NeedApp.class).alias().length != 0;
+    static void checkOutputAnnotationValue(Element targetClass, ExecutableElement method, Element outputAnnotation) {
+        if (outputAnnotation == null)
+            throw new IllegalArgumentException(String.format("Method %s() in %s must have same annotation value as @OnAppUninstalled value",
+                    method.getSimpleName(), targetClass.getSimpleName()));
     }
-
 
     private <T> void checkNonNull(T value) {
         if (value == null)

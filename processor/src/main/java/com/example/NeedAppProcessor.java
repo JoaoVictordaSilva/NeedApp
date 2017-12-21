@@ -1,8 +1,8 @@
 package com.example;
 
-import com.example.annotation.NeedApp;
-import com.example.annotation.TargetClass;
 import com.google.auto.service.AutoService;
+import com.needApp.annotation.NeedApp;
+import com.needApp.annotation.TargetClass;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 
@@ -24,8 +24,12 @@ import javax.lang.model.element.TypeElement;
 @AutoService(Processor.class)
 public class NeedAppProcessor extends AbstractProcessor {
 
+    private final String needAppPackage = ClassNameHelper.needAppPackage;
+
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         Set<? extends Element> listTargetClass = roundEnvironment.getElementsAnnotatedWith(TargetClass.class);
+        writeTo(needAppPackage, CodeGenerator.createTypeUtil());
+
         for (Element targetClass : listTargetClass) {
             List<ExecutableElement> listMethods = listMethodsAnnotated(targetClass);
             generateCode(targetClass, listMethods);
@@ -51,13 +55,7 @@ public class NeedAppProcessor extends AbstractProcessor {
 
     private void generateCode(Element element, List<ExecutableElement> executableElement) {
         TypeSpec generatedClass = CodeGenerator.generateType(element, executableElement);
-        String packageName = processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
-        JavaFile javaFile = JavaFile.builder(packageName, generatedClass).build();
-        try {
-            javaFile.writeTo(processingEnv.getFiler());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeTo(needAppPackage, generatedClass);
     }
 
     private List<ExecutableElement> listMethodsAnnotated(Element targetClass) {
@@ -71,6 +69,19 @@ public class NeedAppProcessor extends AbstractProcessor {
             }
         }
         return listMethods;
+    }
+
+    private void writeTo(String packageName, TypeSpec typeSpec) {
+        JavaFile javaFile = JavaFile.builder(packageName, typeSpec).build();
+        try {
+            javaFile.writeTo(processingEnv.getFiler());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getPackageName(Element element) {
+        return processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
     }
 
 
