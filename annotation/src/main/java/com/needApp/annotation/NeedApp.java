@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface NeedApp {
-    String[] apps();
+    String app();
 
     String YOUTUBE = "com.google.android.youtube";
 

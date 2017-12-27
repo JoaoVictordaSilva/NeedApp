@@ -22,7 +22,7 @@ class Preconditions {
         checkNeedAppValues(targetClass);
     }
 
-    static <T> void checkTargetClass(T targetClass, T children) {
+    static <T extends Element> void checkTargetClass(T targetClass, T children) {
         if (targetClass == null && children != null)
             throw new IllegalStateException("@NeedApp must have @TargetClass annotated in current class");
     }
@@ -37,19 +37,19 @@ class Preconditions {
             }
         }
         if (!hasAnnotation)
-            throw new IllegalStateException(String.format("Class %s must have at least one method annotated with @NeedApp ",
+            throw new IllegalStateException(String.format("Class %s must have at least one method annotated with @NeedApp",
                     targetClass.getSimpleName()));
     }
 
     private static void checkNeedAppValues(Element targetClass) {
         List<? extends Element> listMethods = targetClass.getEnclosedElements();
-        String[] apps;
+        String app;
         for (Element method : listMethods) {
             NeedApp annotation = method.getAnnotation(NeedApp.class);
             if (annotation != null) {
-                apps = annotation.apps();
+                app = annotation.app();
                 checkModifier(targetClass, method);
-                checkValues(apps, targetClass, method);
+                checkValue(app, targetClass, method);
             }
         }
     }
@@ -65,19 +65,23 @@ class Preconditions {
         }
     }
 
-    private static void checkValues(String[] apps, Element element, Element method) {
-        for (String app : apps)
-            if (app.equals(""))
-                throw new IllegalStateException(String.format("Method %s() in class %s must have a valid annotation value ",
-                        method.getSimpleName(), element.getSimpleName()));
+    private static void checkValue(String value, Element targetClass, Element method) {
+        if (value.equals(""))
+            throw new IllegalStateException(String.format("Method %s() in class %s must have a valid annotation value",
+                    method.getSimpleName(), targetClass.getSimpleName()));
 
     }
 
     static boolean hasOutputAnnotation(Element targetClass) {
         List<? extends Element> enclosedElements = targetClass.getEnclosedElements();
+        String value;
         for (Element method : enclosedElements) {
-            if (method.getAnnotation(OnAppUninstalled.class) != null) {
+            OnAppUninstalled annotation = method.getAnnotation(OnAppUninstalled.class);
+            if (annotation != null) {
+                value = annotation.value();
                 checkOutputAnnotationParameters(targetClass);
+                checkValue(value, targetClass, method);
+                checkModifier(targetClass, method);
                 return true;
             }
         }
@@ -100,11 +104,5 @@ class Preconditions {
             throw new IllegalArgumentException(String.format("Method %s() in %s must have same annotation value as @OnAppUninstalled value",
                     method.getSimpleName(), targetClass.getSimpleName()));
     }
-
-    private <T> void checkNonNull(T value) {
-        if (value == null)
-            throw new IllegalStateException(String.format("%s must not be null", value));
-    }
-
 
 }

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.needApp.MainActivity_Delegate;
 import com.needApp.annotation.NeedApp;
 import com.needApp.annotation.OnAppUninstalled;
 import com.needApp.annotation.TargetClass;
@@ -15,26 +16,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        MainActivity_Delegate.testNeedApp(this, "some text");
     }
-
-    @NeedApp(apps = NeedApp.LINKEDIN)
+    @NeedApp(app = NeedApp.YOUTUBE)
     public void test(String testing) {
         Log.e(this.getClass().toString(), testing);
     }
 
-    @OnAppUninstalled(NeedApp.TWITTER)
+    @OnAppUninstalled(NeedApp.YOUTUBE)
     public void outputAnnotation_1() {
-        Log.e(this.getClass().getSimpleName(), " App unninstalled ");
-    }
-
-    @OnAppUninstalled(NeedApp.LINKEDIN)
-    public void outputAnnotation() {
-        Log.e(this.getClass().getSimpleName(), " App unninstalled linkedinho");
-    }
-
-    @OnAppUninstalled(NeedApp.SNAPCHAT)
-    public void outputAnnotation1() {
-        Log.e(this.getClass().getSimpleName(), " App unninstalled snapxota");
+        Log.e(this.getClass().getSimpleName(), " App unninstalled " + NeedApp.YOUTUBE);
     }
 
 }

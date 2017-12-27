@@ -1,5 +1,6 @@
 apply plugin: 'java'
 
+
 ext{
     autoServiceVersion = '1.0-rc2'
     javaPoetVersion = '1.9.0'
@@ -10,6 +11,7 @@ dependencies {
     compile "com.google.auto.service:auto-service:$autoServiceVersion"
     compile "com.squareup:javapoet:$javaPoetVersion"
     compile project(':annotation')
+    compile 'org.jetbrains.kotlin:kotlin-stdlib:1.2.0'
 }
 
 sourceCompatibility = "1.7"

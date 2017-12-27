@@ -32,76 +32,69 @@ public class CodeGenerator {
         return builder.build();
     }
 
-    public static TypeSpec createTypeUtil() {
+    public static TypeSpec typeUtil() {
         return TypeSpec.classBuilder("Util")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
-                .addMethod(generateAppVerification())
+                .addMethod(appVerification())
                 .build();
     }
 
 
-    public static MethodSpec generateAppVerification() {
+    public static MethodSpec appVerification() {
         return MethodSpec.methodBuilder("isAppInstalled")
                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                 .addParameter(Context, "context")
-                .addParameter(String[].class, "needApps")
-                .addStatement("String[] apps = new String[$N]", "needApps.length")
-                .beginControlFlow("for(int index = 0; index < needApps.length; index++)")
-                .addCode("try{")
-                .addStatement("context.getPackageManager().getPackageInfo(needApps[index], 0)")
-                .addCode("}  catch ($T e){", AndroidException)
-                .addStatement("apps[index] = needApps[index]")
-                .addCode("}")
-                .endControlFlow()
-                .addStatement("return apps")
-                .returns(String[].class)
+                .addParameter(String.class, "needApp")
+                .addStatement("String app = null")
+                .addCode("  try{ \n")
+                .addStatement("context.getPackageManager().getPackageInfo(needApp, 0)")
+                .addCode("} catch ($T e){ \n", AndroidException)
+                .addStatement("app = needApp")
+                .addCode("} \n")
+                .addStatement("return app")
+                .returns(String.class)
                 .build();
 
     }
 
-    private static MethodSpec cloneMethod(ExecutableElement method, String[] apps, Element targetClass) {
+    private static MethodSpec cloneMethod(ExecutableElement method, String app, Element targetClass) {
         MethodSpec.Builder builder = MethodSpec.methodBuilder(method.getSimpleName() + "NeedApp");
         builder.addModifiers(Modifier.PUBLIC, Modifier.FINAL, Modifier.STATIC);
         builder.addParameter(Context, "context");
-        transformArray("values", builder, apps);
-        addBodyMethod(method, apps, builder, targetClass);
+        builder.addStatement("String value = $S", app);
+        addBodyMethod(method, app, builder, targetClass);
         builder.returns(TypeName.VOID);
 
         return builder.build();
     }
 
-    private static void transformArray(String nameMethod, MethodSpec.Builder builder, String[] apps) {
-        builder.addStatement("String[] $L = new String[$L]", nameMethod, apps.length);
-        for (int index = 0; index < apps.length; index++)
-            builder.addStatement("$L[$L] = $S", nameMethod, index, apps[index]);
-    }
 
-    private static void addMethodsToClass(List<ExecutableElement> list, TypeSpec.Builder builder, Element targetClass) {
-        String[] apps;
-        for (ExecutableElement executableElement : list) {
-            apps = executableElement.getAnnotation(NeedApp.class).apps();
-            builder.addMethod(cloneMethod(executableElement, apps, targetClass));
+    private static void addMethodsToClass(List<ExecutableElement> executableElements, TypeSpec.Builder builder, Element targetClass) {
+        String app;
+        for (ExecutableElement executableElement : executableElements) {
+            app = executableElement.getAnnotation(NeedApp.class).app();
+            builder.addMethod(cloneMethod(executableElement, app, targetClass));
         }
     }
 
-    private static void addBodyMethod(ExecutableElement method, String[] apps, MethodSpec.Builder builder, Element targetClass) {
+    private static void addBodyMethod(ExecutableElement method, String app, MethodSpec.Builder builder, Element targetClass) {
         List<? extends VariableElement> parameters = method.getParameters();
         builder.addCode(CodeBlock.builder()
-                .addStatement("$T listApps = $T.$N(context, values)", String[].class, Util, "isAppInstalled")
-                .add("if($N[0] == null)\n", "listApps")
+                .addStatement("String app = $T.$N(context, value)", Util, "isAppInstalled")
+                .add("if(app == null)\n")
                 .add("(($L)context).$L(", targetClass, method.getSimpleName())
                 .add(addParameterToMethodAnnotated(parameters, builder))
                 .addStatement(")")
-                .add(outputAnnotation(method, targetClass, apps))
+                .add(outputAnnotation(targetClass, method, app))
                 .build());
     }
 
 
-    private static CodeBlock outputAnnotation(ExecutableElement method, Element targetClass, String[] apps) {
+    private static CodeBlock outputAnnotation(Element targetClass, ExecutableElement method, String app) {
         CodeBlock.Builder builder = CodeBlock.builder();
         if (Preconditions.hasOutputAnnotation(targetClass)) {
-            builder.add("else");
-            Element outputAnnotation = getOutputAnnotation(targetClass, apps);
+            builder.add("else \n");
+            Element outputAnnotation = getRealOutputAnnotation(targetClass, app);
             Preconditions.checkOutputAnnotationValue(targetClass, method, outputAnnotation);
             builder.addStatement("(($L)context).$L()", targetClass, outputAnnotation.getSimpleName());
         }
@@ -133,6 +126,14 @@ public class CodeGenerator {
         return null;
     }
 
+    private static Element getRealOutputAnnotation(Element targetClass, String app) {
+        Element outputAnnotationValue = getOutputAnnotationValue(targetClass, app);
+        if (outputAnnotationValue != null)
+            return outputAnnotationValue;
+
+        return null;
+    }
+
     private static Element getOutputAnnotationValue(Element targetClass, String app) {
         List<? extends Element> targetClassMethods = targetClass.getEnclosedElements();
         for (Element method : targetClassMethods) {
@@ -141,15 +142,6 @@ public class CodeGenerator {
                 return method;
         }
 
-        return null;
-    }
-
-    private static Element getOutputAnnotation(Element targetClass, String[] apps) {
-        for (String app : apps) {
-            Element outputAnnotationValue = getOutputAnnotationValue(targetClass, app);
-            if (outputAnnotationValue != null)
-                return outputAnnotationValue;
-        }
         return null;
     }
 

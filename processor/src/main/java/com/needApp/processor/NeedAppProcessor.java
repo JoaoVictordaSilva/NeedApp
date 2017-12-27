@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
+
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -26,9 +28,29 @@ public class NeedAppProcessor extends AbstractProcessor {
 
     private final String needAppPackage = ClassNameHelper.needAppPackage;
 
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnvironment) {
+        super.init(processingEnvironment);
+    }
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        Set<String> stringSet = new TreeSet<>();
+        stringSet.add(TargetClass.class.getCanonicalName());
+        stringSet.add(NeedApp.class.getCanonicalName());
+        return stringSet;
+    }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
+
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         Set<? extends Element> listTargetClass = roundEnvironment.getElementsAnnotatedWith(TargetClass.class);
-        writeTo(needAppPackage, CodeGenerator.createTypeUtil());
+        Set<? extends Element> listNeedApp = roundEnvironment.getElementsAnnotatedWith(NeedApp.class);
+        Preconditions.checkTargetClass(getElement(listTargetClass), getElement(listNeedApp));
+        writeTo(needAppPackage, CodeGenerator.typeUtil());
 
         for (Element targetClass : listTargetClass) {
             List<ExecutableElement> listMethods = listMethodsAnnotated(targetClass);
@@ -38,24 +60,8 @@ public class NeedAppProcessor extends AbstractProcessor {
         return true;
     }
 
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        return Collections.singleton(TargetClass.class.getCanonicalName());
-    }
-
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.latestSupported();
-    }
-
-    @Override
-    public synchronized void init(ProcessingEnvironment processingEnvironment) {
-        super.init(processingEnvironment);
-    }
-
-    private void generateCode(Element element, List<ExecutableElement> executableElement) {
-        TypeSpec generatedClass = CodeGenerator.generateType(element, executableElement);
-        writeTo(needAppPackage, generatedClass);
+    private Element getElement(Set<? extends Element> elements) {
+        return elements.iterator().hasNext() ? elements.iterator().next() : null;
     }
 
     private List<ExecutableElement> listMethodsAnnotated(Element targetClass) {
@@ -71,6 +77,11 @@ public class NeedAppProcessor extends AbstractProcessor {
         return listMethods;
     }
 
+    private void generateCode(Element element, List<ExecutableElement> executableElement) {
+        TypeSpec generatedClass = CodeGenerator.generateType(element, executableElement);
+        writeTo(needAppPackage, generatedClass);
+    }
+
     private void writeTo(String packageName, TypeSpec typeSpec) {
         JavaFile javaFile = JavaFile.builder(packageName, typeSpec).build();
         try {
@@ -79,10 +90,4 @@ public class NeedAppProcessor extends AbstractProcessor {
             e.printStackTrace();
         }
     }
-
-    private String getPackageName(Element element) {
-        return processingEnv.getElementUtils().getPackageOf(element).getQualifiedName().toString();
-    }
-
-
 }
