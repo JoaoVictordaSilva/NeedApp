@@ -22,8 +22,8 @@ class Preconditions {
         checkNeedAppValues(targetClass);
     }
 
-    static <T extends Element> void checkTargetClass(T targetClass, T children) {
-        if (targetClass == null && children != null)
+    static <T extends Element> void checkTargetClass(T targetClass, T child) {
+        if (targetClass == null && child != null)
             throw new IllegalStateException("@NeedApp must have @TargetClass annotated in current class");
     }
 
