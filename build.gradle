@@ -1,9 +1,9 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-
 buildscript {
-    ext.kotlin_version = '1.2.10'
     ext.kotlin_version = '1.2.0'
+
     repositories {
+        mavenCentral()
         jcenter()
     }
     dependencies {
@@ -14,9 +14,12 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
-apply plugin: 'kotlin'
 
-ext{
+plugins {
+    id "com.jfrog.bintray" version "1.7"
+}
+
+ext {
     butterKnifeVersion = '8.6.0'
     rxJavaVersion = '2.0.1'
     retrofitVersion = '2.3.0'
@@ -28,6 +31,20 @@ ext{
     googleServices = '3.1.0'
     firebaseVersion = '11.0.4'
     daggerVersion = '2.11'
+
+    your_name = 'João Victor da Silva'
+    your_email = 'joao150598@gmail.com'
+    your_github_name = 'JoaoVictordaSilva'
+
+    project_name = 'NeedApp'
+    project_description = 'A simple library using annotation processing to verify if other applications are installed on the system'
+    project_group = 'com.joaovictor'
+    project_artifact = 'needApp'
+    project_version = '1.0.03'
+    project_license = 'The Apache Software License, Version 2.0' // the full license name
+    project_license_tag = 'Apache-2.0' // the license tag name
+    project_license_url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+    // link to the license
 }
 
 allprojects {
@@ -35,24 +52,100 @@ allprojects {
         jcenter()
         mavenCentral()
     }
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+
 }
 
-//task clean(type: Delete) {
-//    delete rootProject.buildDir
-//}
 repositories {
     mavenCentral()
 }
 dependencies {
+    apply plugin: 'kotlin'
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
 }
-compileKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+
+group project_group
+version project_version
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            groupId project_group
+            artifactId project_artifact
+            version project_version
+            artifact sourcesJar
+            artifact javadocJar
+            pom.withXml {
+                asNode().children().last() + {
+                    resolveStrategy = Closure.DELEGATE_FIRST
+                    name project_name
+                    description project_description
+                    url "https://github.com/$your_github_name/$project_name"
+                    scm {
+                        url "https://github.com/$your_github_name/$project_name"
+                        connection "scm:git:git://github.com/$your_github_name/${project_name}.git"
+                        developerConnection "scm:git:ssh:git@github.com:$your_github_name/${project_name}.git"
+                    }
+                    licenses {
+                        license {
+                            name project_license
+                            url project_license_url
+                            distribution 'repo'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id your_github_name
+                            name your_name
+                            email your_email
+                        }
+                    }
+                }
+            }
+        }
     }
 }
-compileTestKotlin {
-    kotlinOptions {
-        jvmTarget = "1.8"
+
+Properties properties = new Properties()
+properties.load(new FileInputStream(file(rootProject.file('local.properties'))))
+
+bintray {
+    user = properties.getProperty("bintray.user")
+    key = properties.getProperty("bintray.apikey")
+    publications = ['maven']
+    pkg {
+        repo = 'maven'
+        name = project_name
+        desc = project_description
+        licenses = [project_license_tag]
+        publicDownloadNumbers = true
+        websiteUrl = "https://github.com/$your_github_name/$project_name"
+        issueTrackerUrl = "https://github.com/$your_github_name/$project_name/issues"
+        vcsUrl = "https://github.com/$your_github_name/${project_name}.git"
+        githubRepo = "$your_github_name/$project_name"
+        version {
+            name = project_version
+            vcsTag = project_version
+            gpg {
+                sign = true
+            }
+        }
     }
 }
+
+
+
+

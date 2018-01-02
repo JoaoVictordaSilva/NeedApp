@@ -8,11 +8,9 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -26,7 +24,8 @@ import javax.lang.model.element.TypeElement;
 @AutoService(Processor.class)
 public class NeedAppProcessor extends AbstractProcessor {
 
-    private final String needAppPackage = ClassNameHelper.needAppPackage;
+    private CodeGenerator mCodeGenerator = new CodeGenerator();
+    private static final String mNeedAppPackage = ClassNameHelper.needAppPackage;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnvironment) {
@@ -49,8 +48,8 @@ public class NeedAppProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
         Set<? extends Element> listTargetClass = roundEnvironment.getElementsAnnotatedWith(TargetClass.class);
         Set<? extends Element> listNeedApp = roundEnvironment.getElementsAnnotatedWith(NeedApp.class);
+        writeTo(mNeedAppPackage, mCodeGenerator.typeUtil());
         Preconditions.checkTargetClass(getElement(listTargetClass), getElement(listNeedApp));
-        writeTo(needAppPackage, CodeGenerator.typeUtil());
 
         for (Element targetClass : listTargetClass) {
             List<ExecutableElement> listMethods = listMethodsAnnotated(targetClass);
@@ -78,8 +77,8 @@ public class NeedAppProcessor extends AbstractProcessor {
     }
 
     private void generateCode(Element element, List<ExecutableElement> executableElement) {
-        TypeSpec generatedClass = CodeGenerator.generateType(element, executableElement);
-        writeTo(needAppPackage, generatedClass);
+        TypeSpec generatedClass = mCodeGenerator.generateType(element, executableElement);
+        writeTo(mNeedAppPackage, generatedClass);
     }
 
     private void writeTo(String packageName, TypeSpec typeSpec) {

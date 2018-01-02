@@ -16,8 +16,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        MainActivity_Delegate.testNeedApp(this, "some text");
+        MainActivity_Delegate.testNeedApp(this, "ola");
     }
+
     @NeedApp(app = NeedApp.YOUTUBE)
     public void test(String testing) {
         Log.e(this.getClass().toString(), testing);
@@ -25,7 +26,8 @@ public class MainActivity extends AppCompatActivity {
 
     @OnAppUninstalled(NeedApp.YOUTUBE)
     public void outputAnnotation_1() {
-        Log.e(this.getClass().getSimpleName(), " App unninstalled " + NeedApp.YOUTUBE);
+        Log.e(this.getClass().getSimpleName(), " App uninstalled " + NeedApp.YOUTUBE);
+
     }
 
 }

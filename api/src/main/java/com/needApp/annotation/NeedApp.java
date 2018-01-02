@@ -27,6 +27,5 @@ public @interface NeedApp {
     String WHATSAPP = "com.whatsapp.android";
 
     String LINKEDIN = "com.linkedin.android";
-
 }
 
