@@ -8,5 +8,5 @@ A simple library using annotation processing to verify if other applications are
 
 `@NeedApp` -> To check if app is installed.
 
-`@OnAppUninstalled` -> It is an output annotation, use is to show applications that were not found in the system.
+`@OnAppUninstalled` -> It is an output annotation, use this to show applications that were not found in the system.
 
