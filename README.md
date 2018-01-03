@@ -1,6 +1,6 @@
 # NeedApp
 
-  [ ![Download](https://api.bintray.com/packages/jhonltda/NeedApp/NeedApp/images/download.svg) ](https://bintray.com/jhonltda/NeedApp/NeedApp/_latestVersion)
+ [ ![Download](https://api.bintray.com/packages/joaovictor/maven/NeedApp/images/download.svg) ](https://bintray.com/joaovictor/maven/NeedApp/_latestVersion)
 
 A simple library using annotation processing to verify if other applications are installed on the system.
 
