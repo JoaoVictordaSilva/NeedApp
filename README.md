@@ -10,3 +10,5 @@ A simple library using annotation processing to verify if other applications are
 
 `@OnAppUninstalled` -> It is an output annotation, use this to show applications that were not found in the system.
 
+
+<a href='https://bintray.com/joaovictor/maven/NeedApp?source=watch' alt='Get automatic notifications about new "NeedApp" versions'><img src='https://www.bintray.com/docs/images/bintray_badge_color.png'></a>
