@@ -1,6 +1,8 @@
 # NeedApp
 
- [ ![Download](https://api.bintray.com/packages/joaovictor/maven/NeedApp/images/download.svg) ](https://bintray.com/joaovictor/maven/NeedApp/_latestVersion)
+ [ ![Download](https://api.bintray.com/packages/joaovictor/maven/NeedApp/images/download.svg) ](https://bintray.com/joaovictor/maven/NeedApp/_latestVersion) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+
 
 A simple library using annotation processing to verify if other applications are installed on the system.
 
